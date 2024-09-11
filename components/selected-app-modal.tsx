@@ -116,7 +116,7 @@ const SelectedAppModal = ({
             ready?
           </Display>
           <LargeTitle className={classes.subtitleText}>
-            {selectedApp.statusRel?.text}
+            {selectedApp.status?.text}
           </LargeTitle>
         </div>
         <Card className={"w-full"} appearance={"filled-alternative"}>
@@ -191,7 +191,7 @@ const SelectedAppModal = ({
             >
               <Subtitle1>Tags:</Subtitle1>
               {selectedApp.tags.map((tag) => (
-                <Tag key={tag}>{tag}</Tag>
+                <Tag key={tag.id}>{tag.name}</Tag>
               ))}
             </div>
           )}
