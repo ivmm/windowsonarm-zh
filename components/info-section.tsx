@@ -111,7 +111,12 @@ const InfoSection: React.FC<InfoSectionProps> = ({
             .sort((a, b) => a.index - b.index)
             .map((category) => {
               // @ts-ignore
-              const Icon = FluentIcons[category.icon];
+              let Icon = FluentIcons[category.icon];
+
+              if (!Icon) {
+                Icon = FluentIcons.InfoRegular;
+              }
+
               return (
                 <Tab key={category.id} value={category.id} icon={<Icon />}>
                   {category.name}
