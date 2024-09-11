@@ -22,6 +22,7 @@ export async function generateMetadata({
   return {
     title: `Is ${app.title} ARM ready? - Windows on ARM`,
     description: `Check if ${app.title} is ARM ready on Windows and can be used on Windows ARM devices such as the Surface with the Snapdragon X Elite.`,
+    keywords: app.tags.map((tag: any) => tag.name).join(", "),
   };
 }
 

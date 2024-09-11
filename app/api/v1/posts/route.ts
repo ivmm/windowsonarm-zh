@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
 
     const { env } = getRequestContext();
 
-    const prisma = getPrisma(env.DATABASE_URL);
+    const prisma = getPrisma(env.DB);
 
     const posts = await prisma.post.findMany({
       take: POSTS_PER_PAGE,
@@ -40,21 +40,20 @@ export async function GET(request: NextRequest) {
       where: {
         AND: [
           category ? { category: { id: category } } : {},
-          status ? { status: parseInt(status) } : { status: { not: -1 } },
+          status ? { status_id: parseInt(status) } : { status_id: { not: -1 } },
           search
             ? {
                 OR: [
-                  { title: { contains: search, mode: "insensitive" } },
-                  { description: { contains: search, mode: "insensitive" } },
-                  { company: { contains: search, mode: "insensitive" } },
-                  { tags: { hasSome: [search] } },
+                  { title: { contains: search } },
+                  { description: { contains: search } },
+                  { company: { contains: search } },
                 ],
               }
             : {},
         ],
       },
       include: {
-        statusRel: true,
+        status: true,
         upvotes: user.userId
           ? {
               where: {
@@ -83,7 +82,8 @@ export async function GET(request: NextRequest) {
 
     const postsWithUpvoteStatus: FullPost[] = posts.map((post) => ({
       ...post,
-      userUpvoted: post.upvotes?.length > 0,
+      tags: [],
+      userUpvoted: false,
       user: null,
     }));
 
@@ -144,7 +144,7 @@ export async function POST(request: NextRequest) {
 
     const { env } = getRequestContext();
 
-    const prisma = getPrisma(env.DATABASE_URL);
+    const prisma = getPrisma(env.DB);
 
     const status = await prisma.status.findUnique({
       where: {
@@ -162,14 +162,13 @@ export async function POST(request: NextRequest) {
         description: postRequest.description,
         company: postRequest.company,
         categoryId: postRequest.categoryId,
-        tags: postRequest.tags,
         app_url: postRequest.app_url,
         banner_url: postRequest.banner_url,
         icon_url: postRequest.icon_url,
         status_hint: postRequest.status_hint
           ? parseInt(postRequest.status_hint)
           : null,
-        status: -1,
+        status_id: -1,
         user_id: userId,
       },
     });

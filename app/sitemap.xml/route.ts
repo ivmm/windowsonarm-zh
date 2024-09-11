@@ -47,7 +47,7 @@ export async function GET() {
   try {
     const { env } = getRequestContext();
 
-    const prisma = getPrisma(env.DATABASE_URL);
+    const prisma = getPrisma(env.DB);
 
     const apps = await prisma.post.findMany({
       select: { id: true, updated_at: true },

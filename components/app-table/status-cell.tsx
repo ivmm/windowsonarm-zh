@@ -11,6 +11,11 @@ const StatusCell: React.FC<StatusCellProps> = ({ status }) => {
   const getIconByStatus = (status: Status) => {
     // @ts-ignore
     const Icon = FluentIcons[status.icon];
+
+    if (!Icon) {
+      return <FluentIcons.InfoRegular />;
+    }
+
     return <Icon />;
   };
 
