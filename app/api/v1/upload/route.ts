@@ -1,5 +1,5 @@
 // app/api/get-upload-url/route.ts
-import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+/*import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { NextRequest, NextResponse } from "next/server";
 import { getRequestContext } from "@cloudflare/next-on-pages";
@@ -78,3 +78,4 @@ export async function POST(request: NextRequest) {
     return ErrorResponse.json("Failed to generate upload URL");
   }
 }
+*/
