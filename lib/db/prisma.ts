@@ -1,16 +1,12 @@
-import {PrismaClient} from '@prisma/client'
-import {PrismaNeon} from '@prisma/adapter-neon'
-import {Pool} from '@neondatabase/serverless'
+import { PrismaClient } from "@prisma/client";
+import { D1Database } from "@cloudflare/workers-types";
+import { DriverAdapter } from "@prisma/client/runtime/library";
+import { PrismaD1 } from "@prisma/adapter-d1";
 
-const getPrisma = (connectionString: string | null = null): PrismaClient => {
-  if (!connectionString) {
-    connectionString = process.env.DATABASE_URL as string;
-  }
+const getPrisma = (connection: D1Database): PrismaClient => {
+  let adapter: DriverAdapter = new PrismaD1(connection);
 
-  const neon = new Pool({ connectionString })
-  const adapter = new PrismaNeon(neon)
+  return new PrismaClient({ adapter });
+};
 
-  return new PrismaClient({adapter})
-}
-
-export default getPrisma
+export default getPrisma;

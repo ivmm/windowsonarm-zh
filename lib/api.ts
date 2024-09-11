@@ -8,13 +8,14 @@ export async function getAppById(id: string) {
 
   const { env } = getRequestContext();
 
-  const prisma = getPrisma(env.DATABASE_URL);
+  const prisma = getPrisma(env.DB);
 
   try {
     const post = await prisma.post.findUnique({
       where: { id },
       include: {
-        statusRel: true,
+        status: true,
+        tags: true,
         upvotes: userId
           ? {
               where: {

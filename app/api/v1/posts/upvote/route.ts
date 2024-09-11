@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
 
     const { env } = getRequestContext();
 
-    const prisma = getPrisma(env.DATABASE_URL);
+    const prisma = getPrisma(env.DB);
 
     const post = await prisma.post.findUnique({
       where: {

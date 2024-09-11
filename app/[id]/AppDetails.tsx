@@ -76,9 +76,9 @@ export default function AppDetailsContent({ app }: AppDetailsContentProps) {
           <h2 className={`${classes.heroSubtitle} mb-6`}>
             <span
               className={`inline-block px-3 py-1 rounded-full`}
-              style={{ backgroundColor: app.statusRel?.color }}
+              style={{ backgroundColor: app.status?.color }}
             >
-              {app.statusRel?.text}
+              {app.status?.text}
             </span>
           </h2>
           <div className="flex items-center space-x-4 text-sm">
@@ -113,8 +113,8 @@ export default function AppDetailsContent({ app }: AppDetailsContentProps) {
                 <Subtitle1 className="mb-4">Tags</Subtitle1>
                 <div className="flex flex-wrap gap-2">
                   {app.tags.map((tag) => (
-                    <Tag key={tag} className="text-sm">
-                      {tag}
+                    <Tag key={tag.id} className="text-sm">
+                      {tag.name}
                     </Tag>
                   ))}
                 </div>
