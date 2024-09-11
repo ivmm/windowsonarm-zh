@@ -1,0 +1,10 @@
+#:schema node_modules/wrangler/config-schema.json
+name = "windowsonarm-cf"
+compatibility_date = "2024-03-20"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = ".vercel/output/static"
+
+[[d1_databases]]
+binding = "DB" # i.e. available in your Worker on env.DB
+database_name = "windows-on-arm"
+database_id = "eed82e07-d376-4f11-a167-dd4c15b4f3ee"
