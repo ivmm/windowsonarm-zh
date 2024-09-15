@@ -135,7 +135,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const postRequest = (await request.json()) as postRequest;
+    const postRequest = (await request.json()) as postRequest & {
+      tags: string[];
+    };
 
     const userId = auth().userId;
 
@@ -157,6 +159,25 @@ export async function POST(request: NextRequest) {
       return ErrorResponse.json("Testing status (-1) not found");
     }
 
+    // Create or find tags
+    const tagObjects = postRequest.tags
+      ? await Promise.all(
+          postRequest.tags.map(async (tagName) => {
+            const existingTag = await prisma.tag.findFirst({
+              where: { name: tagName },
+            });
+
+            if (existingTag) {
+              return existingTag;
+            } else {
+              return prisma.tag.create({
+                data: { name: tagName },
+              });
+            }
+          }),
+        )
+      : [];
+
     const post = await prisma.post.create({
       data: {
         title: postRequest.title,
@@ -171,6 +192,12 @@ export async function POST(request: NextRequest) {
           : null,
         status_id: -1,
         user_id: userId,
+        tags: {
+          connect: tagObjects.map((tag) => ({ id: tag.id })),
+        },
+      },
+      include: {
+        tags: true,
       },
     });
 

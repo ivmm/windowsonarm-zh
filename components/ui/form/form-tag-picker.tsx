@@ -40,7 +40,7 @@ const FormTagPicker = ({
     <Controller
       name={name}
       control={formControl}
-      render={({ field: { onChange, value } }) => (
+      render={({ field: { onChange, value }, fieldState: { error } }) => (
         <FormItem>
           <Label size={"medium"}>{label}</Label>
           <FluentTagPicker
@@ -91,6 +91,7 @@ const FormTagPicker = ({
             </TagPickerList>
           </FluentTagPicker>
           {description && <FormDescription>{description}</FormDescription>}
+          {error && <FormMessage>{error.message}</FormMessage>}
           <FormMessage />
         </FormItem>
       )}
