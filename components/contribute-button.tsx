@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import {
   Button,
   Dialog,
@@ -17,7 +18,6 @@ import { AddCircleFilled } from "@fluentui/react-icons";
 import { Form } from "@/components/ui/form";
 import InputField, { InputTextArea } from "@/components/ui/form/input";
 import SelectField from "@/components/ui/form/select";
-import React, { useState } from "react";
 import { UseQueryResult } from "react-query";
 import { z } from "zod";
 import { aqApi } from "@/lib/axios/api";
@@ -27,12 +27,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import FormTagPicker from "@/components/ui/form/form-tag-picker";
 import { useAuth } from "@clerk/nextjs";
 import Link from "next/link";
+import axios from "axios";
+import FileUploader from "@/components/ui/upload-button";
 
-const formSchema = z.object({
+export const postSchema = z.object({
   title: z.string().max(255),
   company: z.string().max(255),
-  description: z.string(),
-  tags: z.array(z.string()).max(3).optional(),
+  description: z.string().min(50),
+  tags: z.array(z.string()).max(10).optional(),
   app_url: z.string().optional(),
   banner_url: z.string().optional(),
   status_hint: z.string().optional(),
@@ -40,19 +42,31 @@ const formSchema = z.object({
   categoryId: z.string(),
 });
 
-export type postRequest = z.infer<typeof formSchema>;
+export type postRequest = z.infer<typeof postSchema>;
 
 interface ContributeButtonProps {
   query: UseQueryResult<InfoResponse, unknown>;
 }
 
-const ContributeButton = ({ query }: ContributeButtonProps) => {
+interface FileUploadRequest {
+  filename: string;
+  contentType: string;
+}
+
+interface FileUploadResponse {
+  url: string;
+  fields: Record<string, string>;
+  downloadUrl: string;
+}
+
+const ContributeButton: React.FC<ContributeButtonProps> = ({ query }) => {
   const { userId, sessionId, isSignedIn, isLoaded } = useAuth();
   const [dialogOpen, setDialogOpen] = useState(false);
   const { dispatchToast } = useToastController("toaster");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const form = useForm<postRequest>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(postSchema),
   });
 
   const notify = (
@@ -75,12 +89,41 @@ const ContributeButton = ({ query }: ContributeButtonProps) => {
     isIdle: infoIsIdle,
   } = query;
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  const uploadFile = async (file: File): Promise<string> => {
+    const response = await aqApi.post<FileUploadResponse, FileUploadRequest>(
+      "/api/v1/upload",
+      {
+        filename: file.name,
+        contentType: file.type,
+      },
+    );
+
+    if (!response.success) {
+      throw new Error("Failed to get upload URL");
+    }
+
+    const { url, downloadUrl } = response.data;
+
+    await axios.put(url, file, {
+      headers: {
+        "Content-Type": file.type,
+      },
+    });
+
+    return downloadUrl;
+  };
+
+  const onSubmit = async (values: z.infer<typeof postSchema>) => {
     try {
+      if (selectedFile) {
+        values.icon_url = await uploadFile(selectedFile);
+      }
+
       const response = await aqApi.post("/api/v1/posts", values);
 
       if (!response.success) {
         notify("Failed to post application", response.error, "error");
+        return;
       }
 
       form.reset();
@@ -89,11 +132,19 @@ const ContributeButton = ({ query }: ContributeButtonProps) => {
         "Your application has been posted successfully. Approval may take up to one week. You will not be notified of the status of your application.",
         "success",
       );
+      setDialogOpen(false);
     } catch (error) {
       notify("Failed to post application", (error as Error).message, "error");
-    } finally {
-      setDialogOpen(false);
     }
+  };
+
+  const onError = (errors: any) => {
+    console.log(errors);
+    notify(
+      "Form validation failed",
+      "Please check the form for errors. If you believe this is a mistake, please report it on GitHub.",
+      "error",
+    );
   };
 
   return (
@@ -114,14 +165,10 @@ const ContributeButton = ({ query }: ContributeButtonProps) => {
 
       <DialogSurface>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
+          <form onSubmit={form.handleSubmit(onSubmit, onError)}>
             <DialogBody>
               <DialogTitle>Post application</DialogTitle>
               <DialogContent className={"flex gap-4 flex-col"}>
-                <div>
-                  Fill out the form below to post your application. Please note
-                  that all applications are reviewed before being posted.
-                </div>
                 <div className={"flex gap-4 w-full"}>
                   <InputField
                     placeholder={"Photoshop"}
@@ -152,19 +199,15 @@ const ContributeButton = ({ query }: ContributeButtonProps) => {
                   disabled
                   description="Banner URL is coming soon."
                 />
-                <InputField
-                  placeholder={"https://example.com/icon.png"}
-                  formControl={form.control}
-                  label={"Icon URL"}
-                  name={"icon_url"}
-                />
+
+                <FileUploader onFileSelect={(file) => setSelectedFile(file)} />
 
                 {info && (
                   <FormTagPicker
                     formControl={form.control}
                     label={"Tags"}
                     name={"tags"}
-                    options={info.tags}
+                    options={info.tags.map((tag) => tag.name)}
                   />
                 )}
 

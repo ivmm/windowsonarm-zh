@@ -23,14 +23,7 @@ export const getInfo = async (): Promise<InfoResponse> => {
         ORDER BY Status."idx" ASC
     `;
 
-  const tagsRaw = await prisma.$queryRaw<Array<{ name: string }>>`
-        SELECT DISTINCT Tag.name
-        FROM Tag
-                 INNER JOIN _PostToTag ON Tag.id = _PostToTag.B
-        ORDER BY Tag.name
-    `;
-
-  const tags = tagsRaw.map((tag) => tag.name);
+  const tags = await prisma.tag.findMany();
 
   return {
     categories,
