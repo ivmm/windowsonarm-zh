@@ -212,23 +212,7 @@ export default function AppDetailsContent({
               appearance={"filled-alternative"}
               size="large"
             >
-              <Subtitle1 className="mb-4">Discussion</Subtitle1>
-              <Giscus
-                repo="AwaitQuality/windowsonarm"
-                repoId="R_kgDOMUHZaw"
-                category="General"
-                categoryId="DIC_kwDOMUHZa84Cg2tJ"
-                mapping="specific"
-                term={app.title}
-                strict="0"
-                theme={"noborder_dark"}
-                reactionsEnabled="0"
-                emitMetadata="0"
-                inputPosition="bottom"
-                lang="en"
-                loading="lazy"
-              />
-            </Card>
+              <Subtitle1 className="mb-4">Discussion are temporarily disabled</Subtitle1>
           </div>
 
           <div className="lg:col-span-1">
