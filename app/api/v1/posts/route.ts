@@ -6,6 +6,9 @@ import { postRequest } from "@/components/contribute-button";
 import getPrisma from "@/lib/db/prisma";
 import { getRequestContext } from "@cloudflare/next-on-pages";
 import { auth, clerkClient, getAuth } from "@clerk/nextjs/server";
+import { DiscordWebhookClient } from "@/lib/discord/webhook-client"; // You'll need to create this
+import { createDiscordThread } from "@/lib/discord/thread"; // You'll need to create this
+import axios from 'axios';
 
 export const runtime = "edge";
 
@@ -198,6 +201,32 @@ export async function POST(request: NextRequest) {
       },
       include: {
         tags: true,
+      },
+    });
+
+    // Send Discord message and create thread
+    const webhookResponse = await axios.post(env.DISCORD_WEBHOOK_URL, {
+      content: `New app posted: ${post.title}`,
+    });
+
+    const messageId = webhookResponse.data.id;
+    
+    const threadResponse = await axios.post(`https://discord.com/api/v10/channels/${env.DISCORD_CHANNEL_ID}/messages/${messageId}/threads`, {
+      name: `Discussion for ${post.title}`,
+    }, {
+      headers: {
+        Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}`,
+      },
+    });
+
+    const threadId = threadResponse.data.id;
+
+    // Update post with Discord thread info
+    await prisma.post.update({
+      where: { id: post.id },
+      data: {
+        discord_thread_id: threadId,
+        discord_message_id: messageId,
       },
     });
 

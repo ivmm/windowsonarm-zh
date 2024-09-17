@@ -50,6 +50,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { aqApi } from "@/lib/axios/api";
 import { InfoResponse } from "@/lib/backend/response/info/InfoResponse";
+import { useDiscordThread } from "@/lib/hooks/useDiscordThread";
 
 const useStyles = makeStyles({
   heroTitle: {
@@ -95,6 +96,7 @@ export default function AppDetailsContent({
   const { user } = useUser();
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const { messages, loading, error } = useDiscordThread(app.discord_thread_id);
 
   const isEditable = user?.publicMetadata.role === "admin";
 
@@ -212,8 +214,32 @@ export default function AppDetailsContent({
               appearance={"filled-alternative"}
               size="large"
             >
-              <Subtitle1 className="mb-4">Discussion are temporarily disabled. Meanwhile, as we work on a solution, feel free to join our brand new Discord server!</Subtitle1>
-              <iframe src="https://discord.com/widget?id=1284678980527456299&theme=dark" width="350" height="500" allowTransparency frameBorder="0" sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"></iframe>
+              <Subtitle1 className="mb-4">Discussion</Subtitle1>
+              {loading && <p>Loading discussion...</p>}
+              {error && <p>Error loading discussion: {error.message}</p>}
+              {messages && messages.length > 0 ? (
+                <div className="space-y-4">
+                  {messages.map((message) => (
+                    <div key={message.id} className="flex items-start space-x-3">
+                      <Avatar
+                        aria-label={message.author.username}
+                        name={message.author.username}
+                        image={{ src: message.author.avatar_url || undefined }}
+                        size={24}
+                      />
+                      <div>
+                        <div className="flex items-center space-x-2">
+                          <Body1>{message.author.username}</Body1>
+                          <Caption1>{new Date(message.timestamp).toLocaleString()}</Caption1>
+                        </div>
+                        <Body1>{message.content}</Body1>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p>No messages in this discussion yet.</p>
+              )}
             </Card>
           </div>
 
