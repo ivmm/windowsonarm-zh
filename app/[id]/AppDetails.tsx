@@ -213,7 +213,7 @@ export default function AppDetailsContent({
               size="large"
             >
               <Subtitle1 className="mb-4">Discussion are temporarily disabled. Meanwhile, as we work on a solution, feel free to join our brand new Discord server!</Subtitle1>
-              <iframe src="https://discord.com/widget?id=1284678980527456299&theme=dark" width="350" height="500" allowTransparency frameborder="0" sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"></iframe>
+              <iframe src="https://discord.com/widget?id=1284678980527456299&theme=dark" width="350" height="500" allowTransparency frameBorder="0" sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"></iframe>
             </Card>
           </div>
 
