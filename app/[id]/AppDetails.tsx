@@ -213,6 +213,7 @@ export default function AppDetailsContent({
               size="large"
             >
               <Subtitle1 className="mb-4">Discussion are temporarily disabled</Subtitle1>
+            </Card>
           </div>
 
           <div className="lg:col-span-1">
