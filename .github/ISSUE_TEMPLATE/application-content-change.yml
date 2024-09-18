@@ -13,6 +13,18 @@ body:
     validations:
       required: true
 
+  - type: dropdown
+    id: status
+    attributes:
+      label: What is the status of the app's arm support
+      options:
+        - Native
+        - Emulated
+        - Beta support
+        - Not working
+    validations:
+      required: false
+
   - type: input
     id: category-id
     attributes:
