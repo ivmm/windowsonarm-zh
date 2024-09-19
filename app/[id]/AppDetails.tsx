@@ -31,6 +31,7 @@ import {
   EditRegular,
   LinkRegular,
   PersonRegular,
+  ArrowLeftRegular,
 } from "@fluentui/react-icons";
 import dayjs from "dayjs";
 import Link from "next/link";
@@ -117,14 +118,14 @@ export default function AppDetailsContent({
   const notify = (
     title: string,
     subtitle?: string,
-    intent: ToastIntent = "success",
+    intent: ToastIntent = "success"
   ) =>
     dispatchToast(
       <Toast>
         <ToastTitle>{title}</ToastTitle>
         {subtitle && <ToastBody>{subtitle}</ToastBody>}
       </Toast>,
-      { intent },
+      { intent }
     );
 
   const handleEdit = async (values: EditPostRequest) => {
@@ -211,7 +212,7 @@ export default function AppDetailsContent({
               appearance={"filled-alternative"}
               size="large"
             >
-              <Subtitle1 className="mb-4">Discussion</Subtitle1>
+              <Subtitle1>Discussion</Subtitle1>
               <ForumMessages postId={app.id} />
             </Card>
           </div>
@@ -297,7 +298,7 @@ export default function AppDetailsContent({
                 </Link>
                 <ShareButton className={"w-full"} />
                 <Link href="/" passHref className="block">
-                  <Button appearance="subtle" className="w-full">
+                  <Button className="w-full" icon={<ArrowLeftRegular />}>
                     Back to app list
                   </Button>
                 </Link>

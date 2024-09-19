@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Avatar,
   Button,
@@ -8,9 +8,18 @@ import {
   shorthands,
   Text,
   tokens,
+  Dialog,
+  DialogTrigger,
+  DialogSurface,
+  DialogTitle,
+  DialogContent,
+  DialogBody,
+  DialogActions,
 } from "@fluentui/react-components";
 import { useDiscordForum } from "@/lib/hooks/useDiscordForum";
 import GlobalMarkdown from "@/components/markdown";
+import { SiDiscord } from "@icons-pack/react-simple-icons";
+import { DismissRegular, ArrowJoinRegular, SendRegular } from "@fluentui/react-icons";
 
 const useStyles = makeStyles({
   messageContainer: {
@@ -38,6 +47,15 @@ const useStyles = makeStyles({
   },
   replyButton: {
     marginTop: tokens.spacingVerticalM,
+    backgroundColor: tokens.colorBrandBackground,
+    color: tokens.colorNeutralForegroundOnBrand,
+    "&:hover": {
+      backgroundColor: tokens.colorBrandBackgroundHover,
+    },
+  },
+  dialogButton: {
+    minWidth: '120px', // Adjust this value as needed
+    whiteSpace: 'nowrap',
   },
 });
 
@@ -48,11 +66,17 @@ interface ForumMessagesProps {
 export default function ForumMessages({ postId }: ForumMessagesProps) {
   const classes = useStyles();
   const { messages, loading, error, discordUrl } = useDiscordForum(postId);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const handleJoinDiscord = () => {
+    window.open("https://discord.gg/8EVWtctVEk", "_blank");
+  };
 
   const handleReplyClick = () => {
     if (discordUrl) {
       window.open(discordUrl, "_blank");
     }
+    setIsDialogOpen(false);
   };
 
   if (loading) return <Text>Loading forum messages...</Text>;
@@ -87,9 +111,40 @@ export default function ForumMessages({ postId }: ForumMessagesProps) {
         </Card>
       ))}
       {discordUrl && (
-        <Button className={classes.replyButton} onClick={handleReplyClick}>
-          Reply on Discord
-        </Button>
+        <Dialog
+          open={isDialogOpen}
+          onOpenChange={(_, data) => setIsDialogOpen(data.open)}
+        >
+          <DialogTrigger disableButtonEnhancement>
+            <Button 
+              className={classes.replyButton} 
+              icon={<SiDiscord />}
+            >
+              Join and reply on Discord
+            </Button>
+          </DialogTrigger>
+          <DialogSurface>
+            <DialogBody>
+              <DialogTitle>Join Discord</DialogTitle>
+              <DialogContent>
+                To reply to this thread, you need to join our Discord server first. Would you like to join now?
+              </DialogContent>
+              <DialogActions style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                <DialogTrigger disableButtonEnhancement>
+                  <Button appearance="secondary" className={classes.dialogButton} icon={<DismissRegular />}>
+                    Cancel
+                  </Button>
+                </DialogTrigger>
+                <Button appearance="primary" className={classes.dialogButton} onClick={handleJoinDiscord} icon={<ArrowJoinRegular />}>
+                  Join Discord
+                </Button>
+                <Button appearance="primary" className={classes.dialogButton} onClick={handleReplyClick} icon={<SendRegular />}>
+                  Reply on Discord
+                </Button>
+              </DialogActions>
+            </DialogBody>
+          </DialogSurface>
+        </Dialog>
       )}
     </div>
   );

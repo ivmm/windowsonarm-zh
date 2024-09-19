@@ -8,7 +8,7 @@ export const runtime = "edge";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: { id: string } }
 ) {
   try {
     const appId = params.id;
@@ -47,7 +47,7 @@ export async function GET(
             Authorization: `Bot ${discordToken}`,
             "Content-Type": "application/json",
           },
-        },
+        }
       );
 
       forumPostId = forumPostResponse.data.id;
@@ -69,7 +69,7 @@ export async function GET(
     // Fetch the thread information
     const threadResponse = await axios.get(
       `https://discord.com/api/v10/channels/${forumPostId}`,
-      { headers },
+      { headers }
     );
 
     const threadData = threadResponse.data;
@@ -83,7 +83,7 @@ export async function GET(
       await axios.patch(
         `https://discord.com/api/v10/channels/${forumPostId}`,
         { archived: false },
-        { headers },
+        { headers }
       );
       await new Promise((resolve) => setTimeout(resolve, 1000));
     }
@@ -97,7 +97,7 @@ export async function GET(
         params: {
           limit: 100,
         },
-      },
+      }
     );
 
     const messagesData = response.data;
@@ -123,7 +123,7 @@ export async function GET(
     // Set cache control headers
     nextResponse.headers.set(
       "Cache-Control",
-      "no-store, no-cache, must-revalidate, proxy-revalidate",
+      "no-store, no-cache, must-revalidate, proxy-revalidate"
     );
     nextResponse.headers.set("Pragma", "no-cache");
     nextResponse.headers.set("Expires", "0");
@@ -131,6 +131,7 @@ export async function GET(
 
     return nextResponse;
   } catch (error) {
+    console.error(error);
     return ErrorResponse.json((error as Error).message, {
       status: 500,
     });

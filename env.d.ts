@@ -12,7 +12,6 @@ declare global {
     R2_BUCKET_NAME: string;
     R2_PUBLIC_URL: string;
     DISCORD_GUILD_ID: string;
-    DISCORD_CHANNEL_ID: string;
     DISCORD_BOT_TOKEN: string;
     DISCORD_FORUM_CHANNEL_ID: string;
     DISCORD_WEBHOOK_URL: string;
