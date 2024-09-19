@@ -10,6 +10,7 @@ import {
   UserButton,
 } from "@clerk/nextjs";
 import Link from "next/link";
+import { SiDiscord } from "@icons-pack/react-simple-icons";
 
 interface NavigationProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -36,6 +37,9 @@ const Navigation = ({ className, ...props }: NavigationProps) => {
           </Link>
         </div>
         <div className={"flex gap-4 items-center"}>
+          <Link href={"https://discord.gg/8EVWtctVEk"}>
+            <SiDiscord />
+          </Link>
           <ClerkLoading>
             <Button disabled>Loading...</Button>
           </ClerkLoading>

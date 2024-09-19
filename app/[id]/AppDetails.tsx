@@ -5,7 +5,6 @@ import {
   Avatar,
   Body1,
   Button,
-  Caption1,
   Card,
   Dialog,
   DialogActions,
@@ -35,11 +34,9 @@ import {
 } from "@fluentui/react-icons";
 import dayjs from "dayjs";
 import Link from "next/link";
-import Markdown from "react-markdown";
 import { FullPost } from "@/lib/types/prisma/prisma-types";
 import ShareButton from "@/components/share-button";
 import { Container } from "@/components/ui/container";
-import Giscus from "@giscus/react";
 import { useUser } from "@clerk/nextjs";
 import { Form } from "@/components/ui/form";
 import InputField, { InputTextArea } from "@/components/ui/form/input";
@@ -50,6 +47,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { aqApi } from "@/lib/axios/api";
 import { InfoResponse } from "@/lib/backend/response/info/InfoResponse";
+import ForumMessages from "./ForumMessages";
+import GlobalMarkdown from "@/components/markdown";
 
 const useStyles = makeStyles({
   heroTitle: {
@@ -213,21 +212,7 @@ export default function AppDetailsContent({
               size="large"
             >
               <Subtitle1 className="mb-4">Discussion</Subtitle1>
-              <Giscus
-                repo="AwaitQuality/windowsonarm"
-                repoId="R_kgDOMUHZaw"
-                category="General"
-                categoryId="DIC_kwDOMUHZa84Cg2tJ"
-                mapping="specific"
-                term={app.title}
-                strict="0"
-                theme={"noborder_dark"}
-                reactionsEnabled="0"
-                emitMetadata="0"
-                inputPosition="bottom"
-                lang="en"
-                loading="lazy"
-              />
+              <ForumMessages postId={app.id} />
             </Card>
           </div>
 
@@ -436,71 +421,11 @@ function AppDescription({
 }) {
   return (
     <div>
-      <Markdown
-        components={{
-          h1: ({ children }) => (
-            <LargeTitle className="mb-4">{children}</LargeTitle>
-          ),
-          h2: ({ children }) => (
-            <Subtitle1 className="mb-3 mt-6">{children}</Subtitle1>
-          ),
-          h3: ({ children }) => (
-            <Caption1 className="mb-2 mt-4 font-semibold">{children}</Caption1>
-          ),
-          p: ({ children }) => <Body1 className="mb-4">{children}</Body1>,
-          a: ({ children, href }) => (
-            <FluentLink href={href}>{children}</FluentLink>
-          ),
-          ul: ({ children }) => (
-            <ul className="list-disc pl-6 mb-4">{children}</ul>
-          ),
-          ol: ({ children }) => (
-            <ol className="list-decimal pl-6 mb-4">{children}</ol>
-          ),
-          li: ({ children }) => <li className="mb-2">{children}</li>,
-        }}
-      >
+      <GlobalMarkdown>
         {description.slice(0, 820) +
           (description.length > 820 && !expanded ? "..." : "")}
-      </Markdown>
-      {expanded && (
-        <Markdown
-          components={{
-            h1: ({ children }) => (
-              <LargeTitle className="mb-4">{children}</LargeTitle>
-            ),
-            h2: ({ children }) => (
-              <Subtitle1 className="mb-3 mt-6">{children}</Subtitle1>
-            ),
-            h3: ({ children }) => (
-              <Caption1 className="mb-2 mt-4 font-semibold">
-                {children}
-              </Caption1>
-            ),
-            p: ({ children }) => <Body1 className="mb-4">{children}</Body1>,
-            a: ({ children, href }) => (
-              <FluentLink href={href}>{children}</FluentLink>
-            ),
-            ul: ({ children }) => (
-              <ul className="list-disc pl-6 mb-4">{children}</ul>
-            ),
-            ol: ({ children }) => (
-              <ol className="list-decimal pl-6 mb-4">{children}</ol>
-            ),
-            li: ({ children }) => <li className="mb-2">{children}</li>,
-            pre: ({ children }) => (
-              <pre className="bg-gray-800 p-4 rounded-lg overflow-x-auto">
-                {children}
-              </pre>
-            ),
-            code: ({ children }) => (
-              <code className="bg-gray-800 p-1 rounded">{children}</code>
-            ),
-          }}
-        >
-          {description.slice(820)}
-        </Markdown>
-      )}
+      </GlobalMarkdown>
+      {expanded && <GlobalMarkdown>{description.slice(820)}</GlobalMarkdown>}
       {description.length > 820 && (
         <div className="mt-4">
           <FluentLink onClick={() => setExpanded(!expanded)}>
