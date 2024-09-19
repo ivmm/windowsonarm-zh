@@ -2,11 +2,26 @@ import { setupDevPlatform } from "@cloudflare/next-on-pages/next-dev";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Fixes some FluentUI issues
+  // eslint-disable-next-line next-on-pages/no-unsupported-configs
   reactStrictMode: false,
   eslint: {
     // Warning: This allows production builds to successfully complete even if
     // your project has ESLint errors.
     ignoreDuringBuilds: true,
+  },
+  async headers() {
+    return [
+      {
+        source: "/api/v1/discord/forum/:id",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "no-store, max-age=0",
+          },
+        ],
+      },
+    ];
   },
 };
 

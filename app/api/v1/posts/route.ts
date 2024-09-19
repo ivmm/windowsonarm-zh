@@ -6,9 +6,7 @@ import { postRequest } from "@/components/contribute-button";
 import getPrisma from "@/lib/db/prisma";
 import { getRequestContext } from "@cloudflare/next-on-pages";
 import { auth, clerkClient, getAuth } from "@clerk/nextjs/server";
-import { DiscordWebhookClient } from "@/lib/discord/webhook-client"; // You'll need to create this
-import { createDiscordThread } from "@/lib/discord/thread"; // You'll need to create this
-import axios from 'axios';
+import axios from "axios";
 
 export const runtime = "edge";
 
@@ -204,34 +202,37 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Send Discord message and create thread
-    const webhookResponse = await axios.post(env.DISCORD_WEBHOOK_URL, {
-      content: `New app posted: ${post.title}`,
-    });
-
-    const messageId = webhookResponse.data.id;
-    
-    const threadResponse = await axios.post(`https://discord.com/api/v10/channels/${env.DISCORD_CHANNEL_ID}/messages/${messageId}/threads`, {
+    // Create a forum post using Discord API
+    const forumPostData = {
       name: `Discussion for ${post.title}`,
-    }, {
-      headers: {
-        Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}`,
+      auto_archive_duration: 10080, // 7 days
+      message: {
+        content: `A new app has been added: ${post.title}\n\nDescription: ${post.description}\n\nDiscuss this app here!`,
       },
-    });
+    };
 
-    const threadId = threadResponse.data.id;
+    const forumPostResponse = await axios.post(
+      `https://discord.com/api/v10/channels/${env.DISCORD_FORUM_CHANNEL_ID}/threads`,
+      forumPostData,
+      {
+        headers: {
+          Authorization: `Bot ${env.DISCORD_BOT_TOKEN}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
 
-    // Update post with Discord thread info
+    // Update post with Discord forum post info
     await prisma.post.update({
       where: { id: post.id },
       data: {
-        discord_thread_id: threadId,
-        discord_message_id: messageId,
+        discord_forum_post_id: forumPostResponse.data.id,
       },
     });
 
     return DataResponse.json(post);
   } catch (error: any) {
+    console.error(error);
     return ErrorResponse.json(error.message);
   }
 }

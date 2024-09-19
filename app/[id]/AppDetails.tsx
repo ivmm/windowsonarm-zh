@@ -5,7 +5,6 @@ import {
   Avatar,
   Body1,
   Button,
-  Caption1,
   Card,
   Dialog,
   DialogActions,
@@ -35,11 +34,9 @@ import {
 } from "@fluentui/react-icons";
 import dayjs from "dayjs";
 import Link from "next/link";
-import Markdown from "react-markdown";
 import { FullPost } from "@/lib/types/prisma/prisma-types";
 import ShareButton from "@/components/share-button";
 import { Container } from "@/components/ui/container";
-import Giscus from "@giscus/react";
 import { useUser } from "@clerk/nextjs";
 import { Form } from "@/components/ui/form";
 import InputField, { InputTextArea } from "@/components/ui/form/input";
@@ -50,7 +47,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { aqApi } from "@/lib/axios/api";
 import { InfoResponse } from "@/lib/backend/response/info/InfoResponse";
-import { useDiscordThread } from "@/lib/hooks/useDiscordThread";
+import ForumMessages from "./ForumMessages";
+import GlobalMarkdown from "@/components/markdown";
 
 const useStyles = makeStyles({
   heroTitle: {
@@ -96,7 +94,6 @@ export default function AppDetailsContent({
   const { user } = useUser();
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [expanded, setExpanded] = useState(false);
-  const { messages, loading, error } = useDiscordThread(app.discord_thread_id);
 
   const isEditable = user?.publicMetadata.role === "admin";
 
@@ -215,31 +212,7 @@ export default function AppDetailsContent({
               size="large"
             >
               <Subtitle1 className="mb-4">Discussion</Subtitle1>
-              {loading && <p>Loading discussion...</p>}
-              {error && <p>Error loading discussion: {error.message}</p>}
-              {messages && messages.length > 0 ? (
-                <div className="space-y-4">
-                  {messages.map((message) => (
-                    <div key={message.id} className="flex items-start space-x-3">
-                      <Avatar
-                        aria-label={message.author.username}
-                        name={message.author.username}
-                        image={{ src: message.author.avatar_url || undefined }}
-                        size={24}
-                      />
-                      <div>
-                        <div className="flex items-center space-x-2">
-                          <Body1>{message.author.username}</Body1>
-                          <Caption1>{new Date(message.timestamp).toLocaleString()}</Caption1>
-                        </div>
-                        <Body1>{message.content}</Body1>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p>No messages in this discussion yet.</p>
-              )}
+              <ForumMessages postId={app.id} />
             </Card>
           </div>
 
@@ -448,71 +421,11 @@ function AppDescription({
 }) {
   return (
     <div>
-      <Markdown
-        components={{
-          h1: ({ children }) => (
-            <LargeTitle className="mb-4">{children}</LargeTitle>
-          ),
-          h2: ({ children }) => (
-            <Subtitle1 className="mb-3 mt-6">{children}</Subtitle1>
-          ),
-          h3: ({ children }) => (
-            <Caption1 className="mb-2 mt-4 font-semibold">{children}</Caption1>
-          ),
-          p: ({ children }) => <Body1 className="mb-4">{children}</Body1>,
-          a: ({ children, href }) => (
-            <FluentLink href={href}>{children}</FluentLink>
-          ),
-          ul: ({ children }) => (
-            <ul className="list-disc pl-6 mb-4">{children}</ul>
-          ),
-          ol: ({ children }) => (
-            <ol className="list-decimal pl-6 mb-4">{children}</ol>
-          ),
-          li: ({ children }) => <li className="mb-2">{children}</li>,
-        }}
-      >
+      <GlobalMarkdown>
         {description.slice(0, 820) +
           (description.length > 820 && !expanded ? "..." : "")}
-      </Markdown>
-      {expanded && (
-        <Markdown
-          components={{
-            h1: ({ children }) => (
-              <LargeTitle className="mb-4">{children}</LargeTitle>
-            ),
-            h2: ({ children }) => (
-              <Subtitle1 className="mb-3 mt-6">{children}</Subtitle1>
-            ),
-            h3: ({ children }) => (
-              <Caption1 className="mb-2 mt-4 font-semibold">
-                {children}
-              </Caption1>
-            ),
-            p: ({ children }) => <Body1 className="mb-4">{children}</Body1>,
-            a: ({ children, href }) => (
-              <FluentLink href={href}>{children}</FluentLink>
-            ),
-            ul: ({ children }) => (
-              <ul className="list-disc pl-6 mb-4">{children}</ul>
-            ),
-            ol: ({ children }) => (
-              <ol className="list-decimal pl-6 mb-4">{children}</ol>
-            ),
-            li: ({ children }) => <li className="mb-2">{children}</li>,
-            pre: ({ children }) => (
-              <pre className="bg-gray-800 p-4 rounded-lg overflow-x-auto">
-                {children}
-              </pre>
-            ),
-            code: ({ children }) => (
-              <code className="bg-gray-800 p-1 rounded">{children}</code>
-            ),
-          }}
-        >
-          {description.slice(820)}
-        </Markdown>
-      )}
+      </GlobalMarkdown>
+      {expanded && <GlobalMarkdown>{description.slice(820)}</GlobalMarkdown>}
       {description.length > 820 && (
         <div className="mt-4">
           <FluentLink onClick={() => setExpanded(!expanded)}>

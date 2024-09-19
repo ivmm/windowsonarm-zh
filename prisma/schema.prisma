@@ -9,25 +9,26 @@ datasource db {
 }
 
 model Post {
-  id                 String   @id @default(uuid())
-  categoryId         String
-  title              String
-  company            String
-  user_id            String?
-  status_id          Int      @map("status")
-  status_hint        Int?
-  description        String
-  tags               Tag[]
-  app_url            String?
-  community_url      String?
-  banner_url         String?
-  icon_url           String?
-  created_at         DateTime @default(now())
-  updated_at         DateTime @default(now())
-  update_description String?
-  category           Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  status             Status   @relation(fields: [status_id], references: [id])
-  upvotes            Upvote[]
+  id                    String   @id @default(uuid())
+  categoryId            String
+  title                 String
+  company               String
+  user_id               String?
+  status_id             Int      @map("status")
+  status_hint           Int?
+  description           String
+  tags                  Tag[]
+  app_url               String?
+  community_url         String?
+  banner_url            String?
+  icon_url              String?
+  discord_forum_post_id String?
+  created_at            DateTime @default(now())
+  updated_at            DateTime @default(now())
+  update_description    String?
+  category              Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  status                Status   @relation(fields: [status_id], references: [id])
+  upvotes               Upvote[]
 
   @@index([categoryId])
   @@index([status_id])
