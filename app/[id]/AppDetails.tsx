@@ -26,12 +26,12 @@ import {
   useToastController,
 } from "@fluentui/react-components";
 import {
+  ArrowLeftRegular,
   ArrowReplyRegular,
   CalendarRegular,
   EditRegular,
   LinkRegular,
   PersonRegular,
-  ArrowLeftRegular,
   TagRegular,
 } from "@fluentui/react-icons";
 import dayjs from "dayjs";
@@ -51,7 +51,13 @@ import { aqApi } from "@/lib/axios/api";
 import { InfoResponse } from "@/lib/backend/response/info/InfoResponse";
 import ForumMessages from "./ForumMessages";
 import GlobalMarkdown from "@/components/markdown";
-import Image from "next/image";
+import Giscus from "@giscus/react";
+import FileUploader from "@/components/ui/upload-button";
+import axios from "axios";
+import {
+  FileUploadRequest,
+  FileUploadResponse,
+} from "@/app/api/v1/upload/route";
 
 const useStyles = makeStyles({
   heroTitle: {
@@ -97,6 +103,7 @@ export default function AppDetailsContent({
   const { user } = useUser();
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const isEditable = user?.publicMetadata.role === "admin";
 
@@ -120,18 +127,46 @@ export default function AppDetailsContent({
   const notify = (
     title: string,
     subtitle?: string,
-    intent: ToastIntent = "success"
+    intent: ToastIntent = "success",
   ) =>
     dispatchToast(
       <Toast>
         <ToastTitle>{title}</ToastTitle>
         {subtitle && <ToastBody>{subtitle}</ToastBody>}
       </Toast>,
-      { intent }
+      { intent },
     );
+
+  const uploadFile = async (file: File): Promise<string> => {
+    const response = await aqApi.post<FileUploadResponse, FileUploadRequest>(
+      "/api/v1/upload",
+      {
+        filename: file.name,
+        contentType: file.type,
+      },
+    );
+
+    if (!response.success) {
+      throw new Error("Failed to get upload URL");
+    }
+
+    const { url, downloadUrl } = response.data;
+
+    await axios.put(url, file, {
+      headers: {
+        "Content-Type": file.type,
+      },
+    });
+
+    return downloadUrl;
+  };
 
   const handleEdit = async (values: EditPostRequest) => {
     try {
+      if (selectedFile) {
+        values.icon_url = await uploadFile(selectedFile);
+      }
+
       const response = await aqApi.put(`/api/v1/posts/${app.id}`, values);
 
       if (response.success) {
@@ -157,12 +192,10 @@ export default function AppDetailsContent({
           <div className="flex items-center mb-4">
             {app.icon_url && (
               <div className="mr-4 bg-gray-300 p-2 rounded-lg shadow-md w-20 h-20 flex items-center justify-center">
-                <Image
+                <img
                   src={app.icon_url}
                   alt={`${app.title} icon`}
-                  width={64}
-                  height={64}
-                  className="rounded-md max-w-full max-h-full object-contain"
+                  className="rounded-md max-w-full max-h-full object-contain h-[64px] w-[64px]"
                 />
               </div>
             )}
@@ -229,6 +262,27 @@ export default function AppDetailsContent({
             )}
 
             <ForumMessages postId={app.id} />
+            <Card
+              className="rounded-lg shadow-md p-6 mb-8"
+              appearance={"filled-alternative"}
+              size="large"
+            >
+              <Subtitle1 className="mb-4">Discuss on Github</Subtitle1>
+              <Giscus
+                repo="AwaitQuality/windowsonarm"
+                repoId="R_kgDOMUHZaw"
+                category="General"
+                categoryId="DIC_kwDOMUHZa84Cg2tJ"
+                mapping="specific"
+                term={app.title}
+                strict="0"
+                theme={"noborder_dark"}
+                reactionsEnabled="0"
+                emitMetadata="0"
+                inputPosition="bottom"
+                lang="en"
+              />
+            </Card>
           </div>
 
           <div className="lg:col-span-1">
@@ -371,12 +425,17 @@ export default function AppDetailsContent({
                       formControl={form.control}
                       placeholder="https://example.com"
                     />
-                    <InputField
-                      name="icon_url"
-                      label="Icon URL"
-                      formControl={form.control}
-                      placeholder="https://example.com/icon.png"
-                    />
+                    <div>
+                      <InputField
+                        name="icon_url"
+                        label="Icon URL"
+                        formControl={form.control}
+                        placeholder="https://example.com/icon.png"
+                      />
+                      <FileUploader
+                        onFileSelect={(file) => setSelectedFile(file)}
+                      />
+                    </div>
                     <FormTagPicker
                       formControl={form.control}
                       label="Tags"
