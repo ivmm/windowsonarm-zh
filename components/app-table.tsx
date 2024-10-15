@@ -62,11 +62,11 @@ interface Column {
 }
 
 const columns: Column[] = [
-  { columnKey: "title", label: "Application" },
-  { columnKey: "status", label: "Status" },
-  { columnKey: "company", label: "Company" },
-  { columnKey: "author", label: "Author" },
-  { columnKey: "lastUpdated", label: "Last updated" },
+  { columnKey: "title", label: "程序名称" },
+  { columnKey: "status", label: "运行状态" },
+  { columnKey: "company", label: "开发者" },
+  { columnKey: "author", label: "提交者" },
+  { columnKey: "lastUpdated", label: "更新日期" },
 ];
 
 interface AppTableProps {
@@ -136,7 +136,7 @@ const AppTable: React.FC<AppTableProps> = ({ query, onAppClick }) => {
         <MessageBarBody>
           <MessageBarTitle>Something went wrong</MessageBarTitle>
           {/* eslint-disable-next-line react/no-unescaped-entities */}
-          We couldn't fetch the data. Please try again later.
+          我们无法获取数据。请稍后再试。
         </MessageBarBody>
         <MessageBarActions
           containerAction={
